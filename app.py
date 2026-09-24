@@ -7,7 +7,7 @@ from PIL import Image
 import os
 
 # ==============================================================================
-# 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
+# 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS CSS PROFESIONALES
 # ==============================================================================
 st.set_page_config(
     page_title="PrevenSalud IA",
@@ -16,22 +16,140 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Inyección de estilos CSS basados en la identidad visual de PrevenSalud IA
 st.markdown("""
     <style>
-    .metric-card {
+    /* Tipografía y Base general */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: #1E293B;
+    }
+    
+    .stApp {
         background-color: #F8FAFC;
+    }
+
+    /* Fondo de la barra lateral */
+    section[data-testid="stSidebar"] {
+        background-color: #0A2540 !important;
+    }
+    
+    /* Texto e iconos en la barra lateral */
+    section[data-testid="stSidebar"] *, 
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Divisores en la barra lateral */
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* Estilo para Tarjetas de Métricas (KPIs) */
+    div[data-testid="stMetric"] {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-left: 5px solid #1E6091;
+        border-radius: 10px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        font-weight: 600;
+        color: #64748B !important;
+        font-size: 0.85rem !important;
+    }
+    
+    div[data-testid="stMetricValue"] {
+        color: #0A2540 !important;
+        font-weight: 700;
+        font-size: 1.6rem !important;
+    }
+
+    /* Estilo de Pestañas (Tabs) */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #EDF2F7;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid #E2E8F0;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        height: 44px;
+        white-space: pre-wrap;
+        background-color: transparent;
         border-radius: 8px;
-        padding: 15px;
-        border-left: 4px solid #1E3A8A;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        padding: 0px 16px;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #FFFFFF !important;
+        color: #0A2540 !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border-left: 3px solid #D90429 !important;
+    }
+
+    /* Botones primarios con el tono rojo/azul del logo */
+    div.stButton > button[kind="primary"] {
+        background-color: #D90429;
+        color: white;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        padding: 10px 24px;
+        box-shadow: 0 2px 5px rgba(217, 4, 41, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #B80021;
+        box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3);
+    }
+
+    /* Contenedores visuales para secciones */
+    .content-box {
+        background: #FFFFFF;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #E2E8F0;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    /* Encabezados */
+    h1, h2, h3 {
+        color: #0A2540;
+        font-weight: 700;
+    }
+    
+    /* Personalización de alertas */
+    .stAlert {
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
 
+# Paleta de colores para gráficos basada en el logo
+COLOR_PALETTE = ['#0A2540', '#1E6091', '#2A9D8F', '#E76F51', '#D90429', '#457B9D', '#A8DADC']
+
 # ==============================================================================
-# 2. ENCABEZADO CON LOGO CENTRADO Y ALTURA CONTROLADA
+# 2. ENCABEZADO CON LOGO CENTRADO Y COMPACTO
 # ==============================================================================
-# Usamos columnas para centrar el logo y fijamos width=420 para controlar la altura
 col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
@@ -41,22 +159,22 @@ for nombre in nombres_posibles:
     if os.path.exists(nombre):
         try:
             img = Image.open(nombre)
-            col_logo.image(img, width=420)
+            col_logo.image(img, width=400)
             logo_cargado = True
             break
         except Exception:
             pass
 
 if not logo_cargado:
-    st.title("🏥 PREVENSALUD IA")
-    st.markdown("<p style='text-align: center; color: gray;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #0A2540;'>🏥 PREVENSALUD IA</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #64748B; font-weight: 500;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 
-st.markdown("---")
+st.markdown("<hr style='margin-top: 10px; margin-bottom: 25px; border-color: #E2E8F0;'>", unsafe_allow_html=True)
 
 # ==============================================================================
 # 3. BARRA LATERAL (CONFIGURACIÓN Y FILTROS)
 # ==============================================================================
-st.sidebar.header("⚙️ Configuración y Filtros")
+st.sidebar.markdown("### ⚙️ Configuración")
 archivo_subido = st.sidebar.file_uploader("📁 Actualizar Dataset (Excel)", type=["xlsx"])
 
 @st.cache_data
@@ -101,7 +219,7 @@ df = df_base.copy()
 
 # Filtros dinámicos laterales
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔍 Filtros Operativos")
+st.sidebar.markdown("### 🔍 Filtros Operativos")
 
 if 'Servicio actual' in df.columns:
     servicios = ["Todos"] + sorted(list(df['Servicio actual'].dropna().unique()))
@@ -116,7 +234,7 @@ if 'Aseguradora' in df.columns:
         df = df[df['Aseguradora'] == aseg_sel]
 
 st.sidebar.markdown("---")
-st.sidebar.metric("Registros Filtrados", len(df))
+st.sidebar.metric("Registros Filtrados", f"{len(df):,}")
 
 # ==============================================================================
 # 4. ESTRUCTURA DE PESTAÑAS
@@ -132,51 +250,74 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # PESTAÑA 1: DASHBOARD DE CONTROL
 # ------------------------------------------------------------------------------
 with tab1:
-    st.subheader("📈 Resumen Ejecutivo y Capacidades Operativas")
+    st.markdown("### 📈 Resumen Ejecutivo y Capacidades Operativas")
+    st.markdown("<p style='color: #64748B;'>Vista panorámica del comportamiento operativo e indicadores clave del centro médico.</p>", unsafe_allow_html=True)
+    
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Pacientes Activos/Registrados", f"{len(df):,}")
+    col1.metric("Pacientes Activos", f"{len(df):,}")
     
     col_estancia = 'Días estancia' if 'Días estancia' in df.columns else ('Dias estancia' if 'Dias estancia' in df.columns else None)
     if col_estancia and df[col_estancia].notna().any():
-        col2.metric("Promedio Días Estancia", f"{df[col_estancia].mean():.1f} días")
+        col2.metric("Promedio Estancia", f"{df[col_estancia].mean():.1f} días")
     else:
-        col2.metric("Promedio Días Estancia", "N/A")
+        col2.metric("Promedio Estancia", "N/A")
         
     if 'Edad' in df.columns and df['Edad'].notna().any():
-        col3.metric("Promedio Edad Pacientes", f"{df['Edad'].mean():.1f} años")
+        col3.metric("Promedio Edad", f"{df['Edad'].mean():.1f} años")
     else:
-        col3.metric("Promedio Edad Pacientes", "N/A")
+        col3.metric("Promedio Edad", "N/A")
         
     if 'Servicio actual' in df.columns:
-        col4.metric("Servicios Activos Muestreados", f"{df['Servicio actual'].nunique()}")
+        col4.metric("Servicios Activos", f"{df['Servicio actual'].nunique()}")
     else:
         col4.metric("Servicios Activos", "N/A")
         
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     col_g1, col_g2 = st.columns(2)
     with col_g1:
         if 'Diagnóstico actual' in df.columns:
-            st.markdown("**Top 10 Diagnósticos de Mayor Frecuencia**")
+            st.markdown("##### 🩺 Top 10 Diagnósticos Frecuentes")
             top_diag = df['Diagnóstico actual'].value_counts().head(10).reset_index()
             top_diag.columns = ['Diagnóstico', 'Cantidad']
-            fig_diag = px.bar(top_diag, x='Cantidad', y='Diagnóstico', orientation='h', color='Cantidad', color_continuous_scale='Blues')
+            
+            fig_diag = px.bar(
+                top_diag, x='Cantidad', y='Diagnóstico', orientation='h',
+                color_discrete_sequence=['#1E6091']
+            )
+            fig_diag.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=0, r=10, t=10, b=0),
+                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                yaxis=dict(autorange="reversed")
+            )
             st.plotly_chart(fig_diag, use_container_width=True)
             
     with col_g2:
         if 'Servicio actual' in df.columns:
-            st.markdown("**Distribución Porcentual por Servicio Hospitalario**")
+            st.markdown("##### 🏥 Distribución por Servicio")
             serv_dist = df['Servicio actual'].value_counts().reset_index()
             serv_dist.columns = ['Servicio', 'Cantidad']
-            fig_serv = px.pie(serv_dist, names='Servicio', values='Cantidad', hole=0.4, color_discrete_sequence=px.colors.qualitative.Pastel)
+            
+            fig_serv = px.pie(
+                serv_dist, names='Servicio', values='Cantidad', hole=0.5,
+                color_discrete_sequence=COLOR_PALETTE
+            )
+            fig_serv.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=0, r=0, t=10, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2)
+            )
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
 # PESTAÑA 2: SIMULADOR PREDICTIVO IA CON RANGO DE FECHAS
 # ------------------------------------------------------------------------------
 with tab2:
-    st.subheader("🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
-    st.write("Defina un **Rango de Fechas** para evaluar la información histórica real y proyectar la demanda del período futuro.")
+    st.markdown("### 🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
+    st.markdown("<p style='color: #64748B;'>Seleccione el rango de fechas para evaluar métricas históricas y proyectar la demanda esperada.</p>", unsafe_allow_html=True)
     
     c_f1, c_f2 = st.columns(2)
     
@@ -196,7 +337,7 @@ with tab2:
     else:
         es_futuro = fecha_inicio > hoy
         
-        st.markdown("---")
+        st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
         st.markdown("##### ⚙️ Parámetros de Capacidad Operativa y Contingencia")
         c_sim1, c_sim2, c_sim3 = st.columns(3)
         
@@ -212,42 +353,47 @@ with tab2:
             jornada = st.selectbox("Turno Operativo Predominante", ["Mañana", "Tarde", "Noche"])
             clima = st.selectbox("Escenario Epidemiológico/Climático", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico / Pandemia"])
 
-        if st.button("🚀 Ejecutar Análisis de Período y Proyección IA", type="primary"):
-            st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🚀 Ejecutar Proyección IA", type="primary"):
+            st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
             
             if not es_futuro:
-                st.markdown(f"### 📋 Análisis Histórico en Tiempo Real ({fecha_inicio.strftime('%d/%m/%Y')} al {fecha_fin.strftime('%d/%m/%Y')})")
+                st.markdown(f"#### 📋 Análisis Histórico ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
                 
                 if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
                     df_rango = df_base[(df_base['Fecha_Solo_Dia'] >= fecha_inicio) & (df_base['Fecha_Solo_Dia'] <= fecha_fin)]
                     ingresos_reales = len(df_rango)
                     
                     r1, r2, r3, r4 = st.columns(4)
-                    r1.metric("Ingresos Totales en Período", f"{ingresos_reales} pacientes")
-                    r2.metric("Duración Evaluada", f"{dias_periodo} días")
+                    r1.metric("Ingresos Totales", f"{ingresos_reales} pac.")
+                    r2.metric("Días Evaluados", f"{dias_periodo} días")
                     
                     if col_estancia and ingresos_reales > 0:
-                        r3.metric("Promedio Estancia Registrada", f"{df_rango[col_estancia].mean():.1f} días")
+                        r3.metric("Prom. Estancia", f"{df_rango[col_estancia].mean():.1f} días")
                     else:
-                        r3.metric("Promedio Estancia Registrada", "N/A")
+                        r3.metric("Prom. Estancia", "N/A")
                         
                     promedio_diario = round(ingresos_reales / dias_periodo, 1) if dias_periodo > 0 else 0
                     r4.metric("Promedio Ingresos/Día", f"{promedio_diario} pac/día")
                     
                     if ingresos_reales > 0:
-                        st.markdown("**Tendencia de Atenciones en el Período Seleccionado:**")
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown("##### 📉 Flujo Diario Histórico de Pacientes")
                         df_trend = df_rango.groupby('Fecha_Solo_Dia').size().reset_index(name='Atenciones')
-                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, title="Flujo Diario de Pacientes")
-                        st.plotly_chart(fig_line, use_container_width=True)
                         
-                        st.dataframe(df_rango, use_container_width=True)
+                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, color_discrete_sequence=['#1E6091'])
+                        fig_line.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                            yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
+                        )
+                        st.plotly_chart(fig_line, use_container_width=True)
                     else:
                         st.warning(f"No se registraron atenciones entre el {fecha_inicio.strftime('%d/%m/%Y')} y el {fecha_fin.strftime('%d/%m/%Y')}.")
-                else:
-                    st.warning("No se detectó una columna de fecha válida en el archivo.")
             
-            # PROYECCIÓN PREDICTIVA A FUTURO
-            st.markdown(f"### 🔮 Proyección Predictiva IA para el Siguiente Período ({dias_periodo} días)")
+            # PROYECCIÓN PREDICTIVA
+            st.markdown(f"#### 🔮 Proyección Predictiva IA ({dias_periodo} días proyectados)")
             
             factor_jornada = 1.3 if jornada == "Noche" else (1.1 if jornada == "Tarde" else 1.0)
             factor_clima = 1.4 if clima == "Pico Epidemiológico / Pandemia" else (1.25 if clima == "Lluvia Intensa" else (1.1 if clima == "Lluvia Moderada" else 1.0))
@@ -257,44 +403,68 @@ with tab2:
             ocupacion_proyectada = min(100.0, ((camas_ocupadas + (estimacion_diaria * 0.45)) / camas_totales) * 100)
             
             p1, p2, p3 = st.columns(3)
-            p1.metric(f"Afluencia Proyectada ({dias_periodo} días)", f"{estimacion_total_periodo:,} pacientes")
-            p2.metric("Ocupación Promedio de Camas", f"{ocupacion_proyectada:.1f}%")
+            p1.metric(f"Afluencia Estimada", f"{estimacion_total_periodo:,} pac.")
+            p2.metric("Ocupación Proyectada Camas", f"{ocupacion_proyectada:.1f}%")
             p3.metric("Demanda Diaria Estimada", f"~{estimacion_diaria} pac/día")
             
+            st.markdown("<br>", unsafe_allow_html=True)
             if ocupacion_proyectada < 75:
-                st.success("🟢 **RIESGO BAJO:** Capacidad óptima para el período evaluado.")
+                st.success("🟢 **RIESGO BAJO:** Capacidad operativa suficiente para la demanda proyectada.")
             elif ocupacion_proyectada < 90:
-                st.warning("🟡 **RIESGO MODERADO:** Se recomienda reforzar personal en turnos pico y agilizar altas.")
+                st.warning("🟡 **RIESGO MODERADO:** Se aconseja agilizar las altas médicas y reforzar personal.")
             else:
-                st.error("🔴 **RIESGO CRÍTICO / SOBRECAPACIDAD:** Alto riesgo de saturación hospitalaria en el período proyectado.")
+                st.error("🔴 **RIESGO ALTO / SOBRECAPACIDAD:** Alto riesgo de saturación hospitalaria en el período.")
 
 # ------------------------------------------------------------------------------
 # PESTAÑA 3: GESTIÓN DE CAPACIDAD Y SERVICIOS
 # ------------------------------------------------------------------------------
 with tab3:
-    st.subheader("🏥 Análisis Operativo de Aseguradoras y Especialidades")
+    st.markdown("### 🏥 Análisis Operativo de Aseguradoras y Especialidades")
+    st.markdown("<p style='color: #64748B;'>Distribución por pagadores/convenios e indicadores de especialidades.</p>", unsafe_allow_html=True)
+    
     col_s1, col_s2 = st.columns(2)
     
     with col_s1:
         if 'Aseguradora' in df.columns:
-            st.markdown("**Pacientes por Aseguradora / Convenio EPS**")
+            st.markdown("##### 💳 Pacientes por Aseguradora / EPS")
             aseg_dist = df['Aseguradora'].value_counts().head(10).reset_index()
             aseg_dist.columns = ['Aseguradora', 'Pacientes']
-            fig_aseg = px.bar(aseg_dist, x='Pacientes', y='Aseguradora', orientation='h', color='Pacientes', color_continuous_scale='Viridis')
+            
+            fig_aseg = px.bar(
+                aseg_dist, x='Pacientes', y='Aseguradora', orientation='h',
+                color_discrete_sequence=['#0A2540']
+            )
+            fig_aseg.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=0, r=10, t=10, b=0),
+                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                yaxis=dict(autorange="reversed")
+            )
             st.plotly_chart(fig_aseg, use_container_width=True)
             
     with col_s2:
         if 'Especialidad' in df.columns:
-            st.markdown("**Distribución por Especialidad Médica**")
+            st.markdown("##### 🩺 Atenciones por Especialidad")
             esp_dist = df['Especialidad'].value_counts().head(10).reset_index()
             esp_dist.columns = ['Especialidad', 'Pacientes']
-            fig_esp = px.pie(esp_dist, names='Especialidad', values='Pacientes', color_discrete_sequence=px.colors.sequential.RdBu)
+            
+            fig_esp = px.pie(
+                esp_dist, names='Especialidad', values='Pacientes',
+                color_discrete_sequence=COLOR_PALETTE
+            )
+            fig_esp.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=0, r=0, t=10, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2)
+            )
             st.plotly_chart(fig_esp, use_container_width=True)
 
 # ------------------------------------------------------------------------------
 # PESTAÑA 4: EXPLORADOR DE DATOS
 # ------------------------------------------------------------------------------
 with tab4:
-    st.subheader("📁 Registros Hospitalarios Filtrados")
-    st.write("Consulta detallada de la base de datos:")
+    st.markdown("### 📁 Registros Hospitalarios Consolidados")
+    st.markdown("<p style='color: #64748B;'>Tabla interactiva con los datos detallados actualmente filtrados.</p>", unsafe_allow_html=True)
     st.dataframe(df, use_container_width=True)
