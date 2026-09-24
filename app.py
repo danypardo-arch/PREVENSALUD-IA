@@ -29,10 +29,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. ENCABEZADO CON LOGO CENTRADO Y AJUSTADO
+# 2. ENCABEZADO CON LOGO CENTRADO Y ALTURA CONTROLADA
 # ==============================================================================
-# Usamos proporciones de columnas para centrar el logo y darle un tamaño elegante
-col_izq, col_logo, col_der = st.columns([1.2, 2.6, 1.2])
+# Usamos columnas para centrar el logo y fijamos width=420 para controlar la altura
+col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
 nombres_posibles = ["Logo.png", "logo.png", "Logo.jpg", "logo.jpg", "Logo.jpeg"]
@@ -41,7 +41,7 @@ for nombre in nombres_posibles:
     if os.path.exists(nombre):
         try:
             img = Image.open(nombre)
-            col_logo.image(img, use_container_width=True)
+            col_logo.image(img, width=420)
             logo_cargado = True
             break
         except Exception:
