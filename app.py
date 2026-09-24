@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from datetime import date, datetime, timedelta
+from datetime import date
 from PIL import Image
 import os
 
@@ -29,14 +29,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. CARGA DE DATOS Y ENCABEZADO CON LOGO
+# 2. ENCABEZADO CON LOGO OFICIAL
 # ==============================================================================
-
-# Carga de Logo en la parte superior junto al título
-col_logo, col_titulo = st.columns([1, 5])
+# Carga del logo exacto "Logo.png" centrado en el encabezado
+col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
-for nombre_logo in ["logo.png", "logo.jpg", "logo.jpeg", "LOGO.PNG", "LOGO.JPG"]:
+for nombre_logo in ["Logo.png", "logo.png", "Logo.jpg", "logo.jpg"]:
     if os.path.exists(nombre_logo):
         try:
             img = Image.open(nombre_logo)
@@ -46,13 +45,15 @@ for nombre_logo in ["logo.png", "logo.jpg", "logo.jpeg", "LOGO.PNG", "LOGO.JPG"]
         except Exception:
             pass
 
-with col_titulo:
+if not logo_cargado:
     st.title("🏥 PREVENSALUD IA")
-    st.caption("Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria")
 
+st.markdown("<p style='text-align: center; color: gray;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# BARRA LATERAL
+# ==============================================================================
+# 3. BARRA LATERAL (CONFIGURACIÓN Y FILTROS)
+# ==============================================================================
 st.sidebar.header("⚙️ Configuración y Filtros")
 archivo_subido = st.sidebar.file_uploader("📁 Actualizar Dataset (Excel)", type=["xlsx"])
 
@@ -96,7 +97,7 @@ if col_fecha:
 
 df = df_base.copy()
 
-# Filtros laterales
+# Filtros dinámicos laterales
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔍 Filtros Operativos")
 
@@ -116,7 +117,7 @@ st.sidebar.markdown("---")
 st.sidebar.metric("Registros Filtrados", len(df))
 
 # ==============================================================================
-# 3. ESTRUCTURA DE PESTAÑAS
+# 4. ESTRUCTURA DE PESTAÑAS
 # ==============================================================================
 tab1, tab2, tab3, tab4 = st.tabs([
     "📊 Tablero Control (KPIs)", 
@@ -169,19 +170,17 @@ with tab1:
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR PREDICTIVO DE DEMANDA POR RANGO DE FECHAS
+# PESTAÑA 2: SIMULADOR PREDICTIVO IA CON SELECCIÓN DE RANGO DE FECHAS
 # ------------------------------------------------------------------------------
 with tab2:
     st.subheader("🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
-    st.write("Defina un **Rango de Fechas** (Semestre, Mes o Días) para evaluar la información histórica real y proyectar la demanda del período futuro.")
+    st.write("Defina un **Rango de Fechas** para analizar la información registrada y proyectar la demanda futura.")
     
-    # 1. Rango de Fechas Extendido
     c_f1, c_f2 = st.columns(2)
     
-    # Rango por defecto adaptado
     hoy = date.today()
     fecha_min = date(2015, 1, 1)
-    fecha_max = date(2030, 12, 31)
+    fecha_max = date(2035, 12, 31)
     
     with c_f1:
         fecha_inicio = st.date_input("Fecha Inicial del Período", value=date(2026, 1, 1), min_value=fecha_min, max_value=fecha_max)
@@ -191,7 +190,7 @@ with tab2:
     dias_periodo = (fecha_fin - fecha_inicio).days + 1
     
     if fecha_inicio > fecha_fin:
-        st.error("Error: La Fecha Inicial no puede ser posterior a la Fecha Final.")
+        st.error("⚠️ La Fecha Inicial no puede ser posterior a la Fecha Final.")
     else:
         es_futuro = fecha_inicio > hoy
         
@@ -214,7 +213,6 @@ with tab2:
         if st.button("🚀 Ejecutar Análisis de Período y Proyección IA", type="primary"):
             st.markdown("---")
             
-            # SI EL RANGO INCLUYE FECHAS PASADAS O HASTA HOY
             if not es_futuro:
                 st.markdown(f"### 📋 Análisis Histórico en Tiempo Real ({fecha_inicio.strftime('%d/%m/%Y')} al {fecha_fin.strftime('%d/%m/%Y')})")
                 
@@ -242,7 +240,7 @@ with tab2:
                         
                         st.dataframe(df_rango, use_container_width=True)
                     else:
-                        st.warning(f"No se registraron atenciones entre el {fecha_inicio.strftime('%d/%m/%Y')} y el {fecha_fin.strftime('%d/%m/%Y')}. Verifique el rango seleccionado o consulte las fechas disponibles en el Explorador de Datos.")
+                        st.warning(f"No se registraron atenciones entre el {fecha_inicio.strftime('%d/%m/%Y')} y el {fecha_fin.strftime('%d/%m/%Y')}.")
                 else:
                     st.warning("No se detectó una columna de fecha válida en el archivo.")
             
