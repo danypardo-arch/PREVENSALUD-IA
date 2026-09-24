@@ -29,16 +29,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. ENCABEZADO CON LOGO OFICIAL
+# 2. ENCABEZADO CON LOGO CENTRADO Y AJUSTADO
 # ==============================================================================
-# Carga del logo exacto "Logo.png" centrado en el encabezado
-col_izq, col_logo, col_der = st.columns([1, 2, 1])
+# Usamos proporciones de columnas para centrar el logo y darle un tamaño elegante
+col_izq, col_logo, col_der = st.columns([1.2, 2.6, 1.2])
 
 logo_cargado = False
-for nombre_logo in ["Logo.png", "logo.png", "Logo.jpg", "logo.jpg"]:
-    if os.path.exists(nombre_logo):
+nombres_posibles = ["Logo.png", "logo.png", "Logo.jpg", "logo.jpg", "Logo.jpeg"]
+
+for nombre in nombres_posibles:
+    if os.path.exists(nombre):
         try:
-            img = Image.open(nombre_logo)
+            img = Image.open(nombre)
             col_logo.image(img, use_container_width=True)
             logo_cargado = True
             break
@@ -47,8 +49,8 @@ for nombre_logo in ["Logo.png", "logo.png", "Logo.jpg", "logo.jpg"]:
 
 if not logo_cargado:
     st.title("🏥 PREVENSALUD IA")
+    st.markdown("<p style='text-align: center; color: gray;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; color: gray;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # ==============================================================================
@@ -75,7 +77,7 @@ else:
     st.warning("Cargue un archivo Excel para habilitar las funciones.")
     st.stop()
 
-# Limpieza básica
+# Limpieza básica de columnas
 df_base.columns = df_base.columns.str.strip()
 
 for col_num in ['Edad', 'Días estancia', 'Dias estancia']:
@@ -170,11 +172,11 @@ with tab1:
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR PREDICTIVO IA CON SELECCIÓN DE RANGO DE FECHAS
+# PESTAÑA 2: SIMULADOR PREDICTIVO IA CON RANGO DE FECHAS
 # ------------------------------------------------------------------------------
 with tab2:
     st.subheader("🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
-    st.write("Defina un **Rango de Fechas** para analizar la información registrada y proyectar la demanda futura.")
+    st.write("Defina un **Rango de Fechas** para evaluar la información histórica real y proyectar la demanda del período futuro.")
     
     c_f1, c_f2 = st.columns(2)
     
