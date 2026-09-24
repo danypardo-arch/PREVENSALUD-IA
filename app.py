@@ -16,10 +16,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inyección de estilos CSS basados en la identidad visual de PrevenSalud IA
+# Inyección de estilos CSS avanzados
 st.markdown("""
     <style>
-    /* Tipografía y Base general */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     html, body, [class*="css"] {
@@ -28,83 +27,89 @@ st.markdown("""
     }
     
     .stApp {
-        background-color: #F8FAFC;
+        background-color: #F1F5F9;
     }
 
-    /* Fondo de la barra lateral */
+    /* BARRA LATERAL (SIDEBAR) */
     section[data-testid="stSidebar"] {
         background-color: #0A2540 !important;
     }
     
-    /* Texto e iconos en la barra lateral */
-    section[data-testid="stSidebar"] *, 
-    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] h1, 
+    section[data-testid="stSidebar"] h2, 
+    section[data-testid="stSidebar"] h3, 
+    section[data-testid="stSidebar"] p, 
+    section[data-testid="stSidebar"] span, 
     section[data-testid="stSidebar"] label {
         color: #FFFFFF !important;
     }
-    
-    /* Divisores en la barra lateral */
-    section[data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.15) !important;
+
+    /* Corrección de legibilidad en inputs y selectboxes de la barra lateral */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] div[role="button"] {
+        background-color: #FFFFFF !important;
+        color: #0A2540 !important;
+        border-radius: 6px;
     }
 
-    /* Estilo para Tarjetas de Métricas (KPIs) */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] * {
+        color: #0A2540 !important;
+    }
+    
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* TARJETAS DE MÉTRICAS (KPIs) */
     div[data-testid="stMetric"] {
         background: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        border: 1px solid #CBD5E1;
         border-left: 5px solid #1E6091;
         border-radius: 10px;
         padding: 16px 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
     
     div[data-testid="stMetricLabel"] {
         font-weight: 600;
-        color: #64748B !important;
-        font-size: 0.85rem !important;
+        color: #475569 !important;
+        font-size: 0.88rem !important;
     }
     
     div[data-testid="stMetricValue"] {
         color: #0A2540 !important;
         font-weight: 700;
-        font-size: 1.6rem !important;
+        font-size: 1.65rem !important;
     }
 
-    /* Estilo de Pestañas (Tabs) */
+    /* DISEÑO RESALTADO DE PESTAÑAS (TABS) */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #EDF2F7;
-        padding: 6px;
+        gap: 6px;
+        background-color: #0A2540;
+        padding: 8px 10px;
         border-radius: 10px;
-        border: 1px solid #E2E8F0;
+        box-shadow: 0 3px 8px rgba(10, 37, 64, 0.15);
     }
 
     .stTabs [data-baseweb="tab"] {
-        height: 44px;
-        white-space: pre-wrap;
+        height: 42px;
         background-color: transparent;
-        border-radius: 8px;
-        color: #475569;
+        border-radius: 6px;
+        color: #CBD5E1 !important;
         font-weight: 600;
         font-size: 0.9rem;
         border: none;
-        padding: 0px 16px;
+        padding: 0px 18px;
     }
 
     .stTabs [aria-selected="true"] {
-        background-color: #FFFFFF !important;
-        color: #0A2540 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        border-left: 3px solid #D90429 !important;
+        background-color: #D90429 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 6px rgba(217, 4, 41, 0.3);
     }
 
-    /* Botones primarios con el tono rojo/azul del logo */
+    /* BOTONES PRIMARIOS */
     div.stButton > button[kind="primary"] {
         background-color: #D90429;
         color: white;
@@ -112,43 +117,26 @@ st.markdown("""
         border-radius: 8px;
         border: none;
         padding: 10px 24px;
-        box-shadow: 0 2px 5px rgba(217, 4, 41, 0.2);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(217, 4, 41, 0.25);
     }
     
     div.stButton > button[kind="primary"]:hover {
         background-color: #B80021;
-        box-shadow: 0 4px 10px rgba(217, 4, 41, 0.3);
     }
 
-    /* Contenedores visuales para secciones */
-    .content-box {
-        background: #FFFFFF;
-        border-radius: 12px;
-        padding: 24px;
-        border: 1px solid #E2E8F0;
-        margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-
-    /* Encabezados */
-    h1, h2, h3 {
+    /* ENCABEZADOS Y CONTENEDORES */
+    h1, h2, h3, h4 {
         color: #0A2540;
         font-weight: 700;
-    }
-    
-    /* Personalización de alertas */
-    .stAlert {
-        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Paleta de colores para gráficos basada en el logo
+# Paleta cromática para gráficos Plotly
 COLOR_PALETTE = ['#0A2540', '#1E6091', '#2A9D8F', '#E76F51', '#D90429', '#457B9D', '#A8DADC']
 
 # ==============================================================================
-# 2. ENCABEZADO CON LOGO CENTRADO Y COMPACTO
+# 2. ENCABEZADO CON LOGO CENTRADO
 # ==============================================================================
 col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
@@ -169,7 +157,7 @@ if not logo_cargado:
     st.markdown("<h1 style='text-align: center; color: #0A2540;'>🏥 PREVENSALUD IA</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #64748B; font-weight: 500;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 
-st.markdown("<hr style='margin-top: 10px; margin-bottom: 25px; border-color: #E2E8F0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin-top: 10px; margin-bottom: 25px; border-color: #CBD5E1;'>", unsafe_allow_html=True)
 
 # ==============================================================================
 # 3. BARRA LATERAL (CONFIGURACIÓN Y FILTROS)
@@ -250,8 +238,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # PESTAÑA 1: DASHBOARD DE CONTROL
 # ------------------------------------------------------------------------------
 with tab1:
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 📈 Resumen Ejecutivo y Capacidades Operativas")
-    st.markdown("<p style='color: #64748B;'>Vista panorámica del comportamiento operativo e indicadores clave del centro médico.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #475569;'>Vista panorámica del comportamiento operativo e indicadores clave del centro médico.</p>", unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Pacientes Activos", f"{len(df):,}")
@@ -289,7 +278,7 @@ with tab1:
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_diag, use_container_width=True)
@@ -313,11 +302,12 @@ with tab1:
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR PREDICTIVO IA CON RANGO DE FECHAS
+# PESTAÑA 2: SIMULADOR PREDICTIVO IA
 # ------------------------------------------------------------------------------
 with tab2:
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
-    st.markdown("<p style='color: #64748B;'>Seleccione el rango de fechas para evaluar métricas históricas y proyectar la demanda esperada.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #475569;'>Seleccione el rango de fechas para evaluar métricas históricas y proyectar la demanda esperada.</p>", unsafe_allow_html=True)
     
     c_f1, c_f2 = st.columns(2)
     
@@ -337,7 +327,7 @@ with tab2:
     else:
         es_futuro = fecha_inicio > hoy
         
-        st.markdown("<hr style='margin: 15px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 15px 0; border-color: #CBD5E1;'>", unsafe_allow_html=True)
         st.markdown("##### ⚙️ Parámetros de Capacidad Operativa y Contingencia")
         c_sim1, c_sim2, c_sim3 = st.columns(3)
         
@@ -355,7 +345,7 @@ with tab2:
 
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🚀 Ejecutar Proyección IA", type="primary"):
-            st.markdown("<hr style='margin: 20px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 20px 0; border-color: #CBD5E1;'>", unsafe_allow_html=True)
             
             if not es_futuro:
                 st.markdown(f"#### 📋 Análisis Histórico ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
@@ -385,8 +375,8 @@ with tab2:
                         fig_line.update_layout(
                             plot_bgcolor='rgba(0,0,0,0)',
                             paper_bgcolor='rgba(0,0,0,0)',
-                            xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
-                            yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
+                            xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
+                            yaxis=dict(showgrid=True, gridcolor='#CBD5E1')
                         )
                         st.plotly_chart(fig_line, use_container_width=True)
                     else:
@@ -419,8 +409,9 @@ with tab2:
 # PESTAÑA 3: GESTIÓN DE CAPACIDAD Y SERVICIOS
 # ------------------------------------------------------------------------------
 with tab3:
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🏥 Análisis Operativo de Aseguradoras y Especialidades")
-    st.markdown("<p style='color: #64748B;'>Distribución por pagadores/convenios e indicadores de especialidades.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #475569;'>Distribución por pagadores/convenios e indicadores de especialidades.</p>", unsafe_allow_html=True)
     
     col_s1, col_s2 = st.columns(2)
     
@@ -438,7 +429,7 @@ with tab3:
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_aseg, use_container_width=True)
@@ -465,6 +456,7 @@ with tab3:
 # PESTAÑA 4: EXPLORADOR DE DATOS
 # ------------------------------------------------------------------------------
 with tab4:
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 📁 Registros Hospitalarios Consolidados")
-    st.markdown("<p style='color: #64748B;'>Tabla interactiva con los datos detallados actualmente filtrados.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #475569;'>Tabla interactiva con los datos detallados actualmente filtrados.</p>", unsafe_allow_html=True)
     st.dataframe(df, use_container_width=True)
