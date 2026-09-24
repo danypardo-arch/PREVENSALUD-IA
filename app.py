@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from datetime import date
+from datetime import date, datetime, timedelta
 from PIL import Image
 import os
 
@@ -16,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Estilo personalizado
 st.markdown("""
     <style>
     .metric-card {
@@ -30,27 +29,31 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. BARRA LATERAL (LOGO, CARGA Y FILTROS)
+# 2. CARGA DE DATOS Y ENCABEZADO CON LOGO
 # ==============================================================================
 
-# Intentar cargar el logo buscando variantes comunes de nombre
-logo_encontrado = False
-for nombre_logo in ["logo.png", "logo.jpg", "logo.jpeg", "LOGO.PNG"]:
+# Carga de Logo en la parte superior junto al título
+col_logo, col_titulo = st.columns([1, 5])
+
+logo_cargado = False
+for nombre_logo in ["logo.png", "logo.jpg", "logo.jpeg", "LOGO.PNG", "LOGO.JPG"]:
     if os.path.exists(nombre_logo):
         try:
-            imagen_logo = Image.open(nombre_logo)
-            st.sidebar.image(imagen_logo, use_container_width=True)
-            logo_encontrado = True
+            img = Image.open(nombre_logo)
+            col_logo.image(img, use_container_width=True)
+            logo_cargado = True
             break
         except Exception:
             pass
 
-if not logo_encontrado:
-    st.sidebar.title("🏥 PrevenSalud IA")
+with col_titulo:
+    st.title("🏥 PREVENSALUD IA")
+    st.caption("Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria")
 
+st.markdown("---")
+
+# BARRA LATERAL
 st.sidebar.header("⚙️ Configuración y Filtros")
-
-# Carga manual opcional de dataset
 archivo_subido = st.sidebar.file_uploader("📁 Actualizar Dataset (Excel)", type=["xlsx"])
 
 @st.cache_data
@@ -78,7 +81,7 @@ for col_num in ['Edad', 'Días estancia', 'Dias estancia']:
     if col_num in df_base.columns:
         df_base[col_num] = pd.to_numeric(df_base[col_num], errors='coerce')
 
-# Procesamiento de fechas robusto
+# Procesamiento de fechas
 col_fecha = None
 columnas_posibles_fecha = ['f. ingreso', 'ingreso', 'fecha', 'f. nacimiento', 'fecha ingreso']
 
@@ -88,14 +91,12 @@ for col in df_base.columns:
         break
 
 if col_fecha:
-    # Convertir a datetime y extraer solo la parte de fecha (sin hora)
     df_base['Fecha_Procesada'] = pd.to_datetime(df_base[col_fecha], errors='coerce')
     df_base['Fecha_Solo_Dia'] = df_base['Fecha_Procesada'].dt.date
 
-# Copia de trabajo para aplicar filtros dinámicos
 df = df_base.copy()
 
-# --- FILTROS DE SEGMENTACIÓN EN BARRA LATERAL ---
+# Filtros laterales
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔍 Filtros Operativos")
 
@@ -113,10 +114,6 @@ if 'Aseguradora' in df.columns:
 
 st.sidebar.markdown("---")
 st.sidebar.metric("Registros Filtrados", len(df))
-
-# Header principal
-st.title("🏥 PREVENSALUD IA")
-st.caption("Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria")
 
 # ==============================================================================
 # 3. ESTRUCTURA DE PESTAÑAS
@@ -172,99 +169,104 @@ with tab1:
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR PREDICTIVO DE DEMANDA CON ANÁLISIS TEMPORAL
+# PESTAÑA 2: SIMULADOR PREDICTIVO DE DEMANDA POR RANGO DE FECHAS
 # ------------------------------------------------------------------------------
 with tab2:
-    st.subheader("🔮 Estimación y Simulación de Demanda (IA)")
-    st.write("Seleccione la fecha de consulta para realizar un **análisis histórico** o proyectar la **demanda futura** con parámetros operativos.")
+    st.subheader("🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
+    st.write("Defina un **Rango de Fechas** (Semestre, Mes o Días) para evaluar la información histórica real y proyectar la demanda del período futuro.")
     
-    # Obtener fecha por defecto razonable basada en el dataset si existe
-    fecha_defecto = date.today()
-    if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
-        fechas_validas = df_base['Fecha_Solo_Dia'].dropna()
-        if not fechas_validas.empty:
-            fecha_defecto = fechas_validas.iloc[0] # Usa la primera fecha del dataset como ejemplo inicial
-
-    col_f1, col_f2 = st.columns([1, 2])
-    with col_f1:
-        fecha_evaluar = st.date_input("Fecha a Evaluar", value=fecha_defecto)
+    # 1. Rango de Fechas Extendido
+    c_f1, c_f2 = st.columns(2)
     
+    # Rango por defecto adaptado
     hoy = date.today()
-    es_futuro = fecha_evaluar > hoy
+    fecha_min = date(2015, 1, 1)
+    fecha_max = date(2030, 12, 31)
     
-    with col_f2:
-        if es_futuro:
-            st.info(f"📅 **Modo Proyección Futura (IA):** Evaluando fecha posterior a hoy ({fecha_evaluar.strftime('%d/%m/%Y')}).")
-        else:
-            st.success(f"📊 **Modo Análisis Histórico:** Evaluando registros pasados o del día actual ({fecha_evaluar.strftime('%d/%m/%Y')}).")
-            
-    st.markdown("---")
-    
-    st.markdown("##### ⚙️ Parámetros de Personal y Capacidad")
-    c_sim1, c_sim2, c_sim3 = st.columns(3)
-    
-    with c_sim1:
-        medicos_input = st.number_input("Médicos Programados en Turno", min_value=1, max_value=50, value=6)
-        enfermeros_input = st.number_input("Enfermeros/Asistentes", min_value=1, max_value=80, value=12)
+    with c_f1:
+        fecha_inicio = st.date_input("Fecha Inicial del Período", value=date(2026, 1, 1), min_value=fecha_min, max_value=fecha_max)
+    with c_f2:
+        fecha_fin = st.date_input("Fecha Final del Período", value=date(2026, 6, 30), min_value=fecha_min, max_value=fecha_max)
         
-    with c_sim2:
-        camas_totales = st.number_input("Camas Totales Disponibles", min_value=10, max_value=300, value=50)
-        camas_ocupadas = st.number_input("Camas Ocupadas Actuales", min_value=0, max_value=300, value=35)
+    dias_periodo = (fecha_fin - fecha_inicio).days + 1
+    
+    if fecha_inicio > fecha_fin:
+        st.error("Error: La Fecha Inicial no puede ser posterior a la Fecha Final.")
+    else:
+        es_futuro = fecha_inicio > hoy
         
-    with c_sim3:
-        jornada = st.selectbox("Turno Operativo", ["Mañana", "Tarde", "Noche"])
-        clima = st.selectbox("Condición Climatológica / Externa", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico"])
-
-    if st.button("🚀 Procesar Evaluación Temporal y Predicción", type="primary"):
         st.markdown("---")
+        st.markdown("##### ⚙️ Parámetros de Capacidad Operativa y Contingencia")
+        c_sim1, c_sim2, c_sim3 = st.columns(3)
         
-        # SI LA FECHA ES PASADA O HOY: Muestra comparación con datos reales del dataset BASE
-        if not es_futuro:
-            st.markdown(f"### 📋 Evaluación Histórica para {fecha_evaluar.strftime('%d/%m/%Y')}")
+        with c_sim1:
+            medicos_input = st.number_input("Médicos Programados por Turno", min_value=1, max_value=50, value=6)
+            enfermeros_input = st.number_input("Enfermeros/Asistentes por Turno", min_value=1, max_value=80, value=12)
             
-            if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
-                df_fecha_filtro = df_base[df_base['Fecha_Solo_Dia'] == fecha_evaluar]
-                ingresos_reales = len(df_fecha_filtro)
+        with c_sim2:
+            camas_totales = st.number_input("Camas Totales Disponibles", min_value=10, max_value=300, value=50)
+            camas_ocupadas = st.number_input("Camas Ocupadas Promedio", min_value=0, max_value=300, value=35)
+            
+        with c_sim3:
+            jornada = st.selectbox("Turno Operativo Predominante", ["Mañana", "Tarde", "Noche"])
+            clima = st.selectbox("Escenario Epidemiológico/Climático", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico / Pandemia"])
+
+        if st.button("🚀 Ejecutar Análisis de Período y Proyección IA", type="primary"):
+            st.markdown("---")
+            
+            # SI EL RANGO INCLUYE FECHAS PASADAS O HASTA HOY
+            if not es_futuro:
+                st.markdown(f"### 📋 Análisis Histórico en Tiempo Real ({fecha_inicio.strftime('%d/%m/%Y')} al {fecha_fin.strftime('%d/%m/%Y')})")
                 
-                r1, r2, r3 = st.columns(3)
-                r1.metric("Ingresos Reales Registrados", f"{ingresos_reales} pacientes")
-                
-                if col_estancia and ingresos_reales > 0:
-                    r2.metric("Promedio Estancia Registrada", f"{df_fecha_filtro[col_estancia].mean():.1f} días")
-                else:
-                    r2.metric("Promedio Estancia Registrada", "N/A")
+                if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
+                    df_rango = df_base[(df_base['Fecha_Solo_Dia'] >= fecha_inicio) & (df_base['Fecha_Solo_Dia'] <= fecha_fin)]
+                    ingresos_reales = len(df_rango)
                     
-                capacidad_cobertura = (ingresos_reales / (medicos_input * 4)) * 100 if medicos_input > 0 else 0
-                r3.metric("Rendimiento Personal Programado", f"{capacidad_cobertura:.1f}%")
-                
-                if ingresos_reales > 0:
-                    st.dataframe(df_fecha_filtro, use_container_width=True)
+                    r1, r2, r3, r4 = st.columns(4)
+                    r1.metric("Ingresos Totales en Período", f"{ingresos_reales} pacientes")
+                    r2.metric("Duración Evaluada", f"{dias_periodo} días")
+                    
+                    if col_estancia and ingresos_reales > 0:
+                        r3.metric("Promedio Estancia Registrada", f"{df_rango[col_estancia].mean():.1f} días")
+                    else:
+                        r3.metric("Promedio Estancia Registrada", "N/A")
+                        
+                    promedio_diario = round(ingresos_reales / dias_periodo, 1) if dias_periodo > 0 else 0
+                    r4.metric("Promedio Ingresos/Día", f"{promedio_diario} pac/día")
+                    
+                    if ingresos_reales > 0:
+                        st.markdown("**Tendencia de Atenciones en el Período Seleccionado:**")
+                        df_trend = df_rango.groupby('Fecha_Solo_Dia').size().reset_index(name='Atenciones')
+                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, title="Flujo Diario de Pacientes")
+                        st.plotly_chart(fig_line, use_container_width=True)
+                        
+                        st.dataframe(df_rango, use_container_width=True)
+                    else:
+                        st.warning(f"No se registraron atenciones entre el {fecha_inicio.strftime('%d/%m/%Y')} y el {fecha_fin.strftime('%d/%m/%Y')}. Verifique el rango seleccionado o consulte las fechas disponibles en el Explorador de Datos.")
                 else:
-                    st.warning(f"No se registraron atenciones con la fecha exacta {fecha_evaluar.strftime('%d/%m/%Y')}. Comprueba en el 'Explorador de Datos' el formato de fechas de tu archivo.")
-            else:
-                st.warning("No se detectó una columna de fecha en el Excel subido.")
-                
-        # SI LA FECHA ES FUTURA: Muestra Proyección y Algoritmo Predictivo
-        else:
-            st.markdown(f"### 🔮 Proyección Predictiva para {fecha_evaluar.strftime('%d/%m/%Y')}")
+                    st.warning("No se detectó una columna de fecha válida en el archivo.")
+            
+            # PROYECCIÓN PREDICTIVA A FUTURO
+            st.markdown(f"### 🔮 Proyección Predictiva IA para el Siguiente Período ({dias_periodo} días)")
             
             factor_jornada = 1.3 if jornada == "Noche" else (1.1 if jornada == "Tarde" else 1.0)
-            factor_clima = 1.35 if clima == "Pico Epidemiológico" else (1.25 if clima == "Lluvia Intensa" else (1.1 if clima == "Lluvia Moderada" else 1.0))
+            factor_clima = 1.4 if clima == "Pico Epidemiológico / Pandemia" else (1.25 if clima == "Lluvia Intensa" else (1.1 if clima == "Lluvia Moderada" else 1.0))
             
-            estimacion_llegadas = int((medicos_input * 2.8 + enfermeros_input * 1.3) * factor_jornada * factor_clima)
-            ocupacion_proyectada = min(100.0, ((camas_ocupadas + (estimacion_llegadas * 0.45)) / camas_totales) * 100)
+            estimacion_diaria = int((medicos_input * 2.8 + enfermeros_input * 1.3) * factor_jornada * factor_clima)
+            estimacion_total_periodo = estimacion_diaria * dias_periodo
+            ocupacion_proyectada = min(100.0, ((camas_ocupadas + (estimacion_diaria * 0.45)) / camas_totales) * 100)
             
             p1, p2, p3 = st.columns(3)
-            p1.metric("Afluencia Estimada (Pacientes)", f"{estimacion_llegadas} pacientes")
-            p2.metric("Ocupación Proyectada de Camas", f"{ocupacion_proyectada:.1f}%")
-            p3.metric("Relación Paciente/Médico Proyectada", f"{round(estimacion_llegadas / medicos_input, 1)}:1")
+            p1.metric(f"Afluencia Proyectada ({dias_periodo} días)", f"{estimacion_total_periodo:,} pacientes")
+            p2.metric("Ocupación Promedio de Camas", f"{ocupacion_proyectada:.1f}%")
+            p3.metric("Demanda Diaria Estimada", f"~{estimacion_diaria} pac/día")
             
             if ocupacion_proyectada < 75:
-                st.success("🟢 **NIVEL DE RIESGO: BAJO**\n\nCapacidad operativamente adecuada para responder a la demanda proyectada.")
+                st.success("🟢 **RIESGO BAJO:** Capacidad óptima para el período evaluado.")
             elif ocupacion_proyectada < 90:
-                st.warning("🟡 **NIVEL DE RIESGO: MODERADO**\n\nAlta demanda prevista. Se sugiere optimizar tiempos de alta y preparar personal de reserva.")
+                st.warning("🟡 **RIESGO MODERADO:** Se recomienda reforzar personal en turnos pico y agilizar altas.")
             else:
-                st.error("🔴 **NIVEL DE RIESGO: CRÍTICO / SATURACIÓN**\n\nAlerta de sobrecapacidad. Activar planes de contingencia para la fecha indicada.")
+                st.error("🔴 **RIESGO CRÍTICO / SOBRECAPACIDAD:** Alto riesgo de saturación hospitalaria en el período proyectado.")
 
 # ------------------------------------------------------------------------------
 # PESTAÑA 3: GESTIÓN DE CAPACIDAD Y SERVICIOS
