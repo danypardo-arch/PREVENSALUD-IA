@@ -7,7 +7,7 @@ from PIL import Image
 import os
 
 # ==============================================================================
-# 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS CSS PROFESIONALES
+# 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS CSS
 # ==============================================================================
 st.set_page_config(
     page_title="PrevenSalud IA",
@@ -16,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inyección de estilos CSS avanzados
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -26,11 +25,30 @@ st.markdown("""
         color: #1E293B;
     }
     
+    /* Fondo principal del contenido */
     .stApp {
-        background-color: #F1F5F9;
+        background-color: #F8FAFC;
     }
 
-    /* BARRA LATERAL (SIDEBAR) */
+    /* -------------------------------------------------------------------------
+       ENCABEZADO BLANCO Y DIFUMINADO (INTEGRACIÓN DEL LOGO)
+       ------------------------------------------------------------------------- */
+    .header-container {
+        background-color: #FFFFFF;
+        padding: 20px 0px 10px 0px;
+        text-align: center;
+        margin-top: -60px; /* Ajuste para cubrir el margen superior */
+    }
+    
+    .header-fade {
+        height: 25px;
+        background: linear-gradient(to bottom, #FFFFFF 0%, #F8FAFC 100%);
+        margin-bottom: 15px;
+    }
+
+    /* -------------------------------------------------------------------------
+       ESTILOS DE LA BARRA LATERAL (SIDEBAR)
+       ------------------------------------------------------------------------- */
     section[data-testid="stSidebar"] {
         background-color: #0A2540 !important;
     }
@@ -44,10 +62,28 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Corrección de legibilidad en inputs y selectboxes de la barra lateral */
-    section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
-    section[data-testid="stSidebar"] input,
-    section[data-testid="stSidebar"] div[role="button"] {
+    /* Corrección del File Uploader (Subir archivo Excel) */
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
+        background-color: #113358 !important;
+        border: 1px dashed rgba(255, 255, 255, 0.3) !important;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] button {
+        background-color: #FFFFFF !important;
+        color: #0A2540 !important;
+        font-weight: 600 !important;
+        border: none !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] small,
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] span {
+        color: #E2E8F0 !important;
+    }
+
+    /* Corrección de Selectboxes */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
         background-color: #FFFFFF !important;
         color: #0A2540 !important;
         border-radius: 6px;
@@ -56,24 +92,42 @@ st.markdown("""
     section[data-testid="stSidebar"] div[data-baseweb="select"] * {
         color: #0A2540 !important;
     }
-    
-    section[data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.2) !important;
+
+    /* Corrección de la métrica en la barra lateral */
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+        background-color: #113358 !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-left: 4px solid #D90429 !important;
+        border-radius: 8px !important;
     }
 
-    /* TARJETAS DE MÉTRICAS (KPIs) */
+    section[data-testid="stSidebar"] div[data-testid="stMetricLabel"] {
+        color: #CBD5E1 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stMetricValue"] {
+        color: #FFFFFF !important;
+    }
+    
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* -------------------------------------------------------------------------
+       TARJETAS DE MÉTRICAS GENERALES (KPIs)
+       ------------------------------------------------------------------------- */
     div[data-testid="stMetric"] {
         background: #FFFFFF;
-        border: 1px solid #CBD5E1;
+        border: 1px solid #E2E8F0;
         border-left: 5px solid #1E6091;
         border-radius: 10px;
         padding: 16px 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
     }
     
     div[data-testid="stMetricLabel"] {
         font-weight: 600;
-        color: #475569 !important;
+        color: #64748B !important;
         font-size: 0.88rem !important;
     }
     
@@ -83,13 +137,15 @@ st.markdown("""
         font-size: 1.65rem !important;
     }
 
-    /* DISEÑO RESALTADO DE PESTAÑAS (TABS) */
+    /* -------------------------------------------------------------------------
+       ESTILO DE PESTAÑAS (TABS)
+       ------------------------------------------------------------------------- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 6px;
         background-color: #0A2540;
         padding: 8px 10px;
         border-radius: 10px;
-        box-shadow: 0 3px 8px rgba(10, 37, 64, 0.15);
+        box-shadow: 0 3px 8px rgba(10, 37, 64, 0.12);
     }
 
     .stTabs [data-baseweb="tab"] {
@@ -124,7 +180,6 @@ st.markdown("""
         background-color: #B80021;
     }
 
-    /* ENCABEZADOS Y CONTENEDORES */
     h1, h2, h3, h4 {
         color: #0A2540;
         font-weight: 700;
@@ -132,12 +187,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Paleta cromática para gráficos Plotly
 COLOR_PALETTE = ['#0A2540', '#1E6091', '#2A9D8F', '#E76F51', '#D90429', '#457B9D', '#A8DADC']
 
 # ==============================================================================
-# 2. ENCABEZADO CON LOGO CENTRADO
+# 2. ENCABEZADO CON FONDO BLANCO Y DIFUMINADO
 # ==============================================================================
+st.markdown('<div class="header-container">', unsafe_allow_html=True)
 col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
@@ -154,10 +209,11 @@ for nombre in nombres_posibles:
             pass
 
 if not logo_cargado:
-    st.markdown("<h1 style='text-align: center; color: #0A2540;'>🏥 PREVENSALUD IA</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748B; font-weight: 500;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
+    col_logo.markdown("<h1 style='text-align: center; color: #0A2540; margin:0;'>🏥 PREVENSALUD IA</h1>", unsafe_allow_html=True)
+    col_logo.markdown("<p style='text-align: center; color: #64748B; font-weight: 500; margin:0;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
 
-st.markdown("<hr style='margin-top: 10px; margin-bottom: 25px; border-color: #CBD5E1;'>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="header-fade"></div>', unsafe_allow_html=True)
 
 # ==============================================================================
 # 3. BARRA LATERAL (CONFIGURACIÓN Y FILTROS)
@@ -278,7 +334,7 @@ with tab1:
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
+                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_diag, use_container_width=True)
@@ -327,7 +383,7 @@ with tab2:
     else:
         es_futuro = fecha_inicio > hoy
         
-        st.markdown("<hr style='margin: 15px 0; border-color: #CBD5E1;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 15px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
         st.markdown("##### ⚙️ Parámetros de Capacidad Operativa y Contingencia")
         c_sim1, c_sim2, c_sim3 = st.columns(3)
         
@@ -345,7 +401,7 @@ with tab2:
 
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🚀 Ejecutar Proyección IA", type="primary"):
-            st.markdown("<hr style='margin: 20px 0; border-color: #CBD5E1;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='margin: 20px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
             
             if not es_futuro:
                 st.markdown(f"#### 📋 Análisis Histórico ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
@@ -375,8 +431,8 @@ with tab2:
                         fig_line.update_layout(
                             plot_bgcolor='rgba(0,0,0,0)',
                             paper_bgcolor='rgba(0,0,0,0)',
-                            xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
-                            yaxis=dict(showgrid=True, gridcolor='#CBD5E1')
+                            xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                            yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
                         )
                         st.plotly_chart(fig_line, use_container_width=True)
                     else:
@@ -429,7 +485,7 @@ with tab3:
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#CBD5E1'),
+                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_aseg, use_container_width=True)
