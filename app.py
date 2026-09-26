@@ -2,55 +2,73 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import date
 from PIL import Image
 import os
 
 # ==============================================================================
-# 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS CSS
+# 1. CONFIGURACIÓN DE PÁGINA
 # ==============================================================================
 st.set_page_config(
-    page_title="PrevenSalud IA",
-    page_icon="🏥",
+    page_title="PrevenSalud IA | Future Health Platform",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# ==============================================================================
+# 2. ESTILOS CSS FUTURISTAS Y NEÓN (GLASSMORPHISM)
+# ==============================================================================
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
     
+    /* CONFIGURACIÓN GENERAL / FONDO ESPACIAL TECNOLÓGICO */
     html, body, [class*="css"] {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        color: #1E293B;
+        font-family: 'Rajdhani', sans-serif;
+        color: #E2E8F0;
     }
     
-    /* Fondo principal del contenido */
     .stApp {
-        background-color: #F8FAFC;
+        background: radial-gradient(circle at 50% 10%, #0d1f38 0%, #030712 70%);
+        background-attachment: fixed;
     }
 
-    /* -------------------------------------------------------------------------
-       ENCABEZADO BLANCO Y DIFUMINADO (INTEGRACIÓN DEL LOGO)
-       ------------------------------------------------------------------------- */
-    .header-container {
-        background-color: #FFFFFF;
-        padding: 20px 0px 10px 0px;
+    /* ENCABEZADO Y CONTENEDOR DEL LOGO (GLASSMORPHISM NEÓN) */
+    .tech-header-container {
+        background: rgba(11, 25, 44, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(0, 210, 255, 0.3);
+        border-radius: 16px;
+        padding: 25px 10px 15px 10px;
         text-align: center;
-        margin-top: -60px; /* Ajuste para cubrir el margen superior */
+        box-shadow: 0 0 25px rgba(0, 210, 255, 0.15), inset 0 0 15px rgba(217, 4, 41, 0.05);
+        margin-bottom: 25px;
+    }
+
+    /* TITULOS FUTURISTAS */
+    h1, h2, h3, h4 {
+        font-family: 'Orbitron', sans-serif !important;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #FFFFFF !important;
     }
     
-    .header-fade {
-        height: 25px;
-        background: linear-gradient(to bottom, #FFFFFF 0%, #F8FAFC 100%);
-        margin-bottom: 15px;
+    .cyber-title {
+        background: linear-gradient(90deg, #FFFFFF 0%, #00D2FF 50%, #FF2A54 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        font-size: 2.2rem;
+        text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
     }
 
-    /* -------------------------------------------------------------------------
-       ESTILOS DE LA BARRA LATERAL (SIDEBAR)
-       ------------------------------------------------------------------------- */
+    /* BARRA LATERAL FUTURISTA */
     section[data-testid="stSidebar"] {
-        background-color: #0A2540 !important;
+        background-color: #050C1A !important;
+        border-right: 1px solid rgba(0, 210, 255, 0.2);
     }
     
     section[data-testid="stSidebar"] h1, 
@@ -59,140 +77,155 @@ st.markdown("""
     section[data-testid="stSidebar"] p, 
     section[data-testid="stSidebar"] span, 
     section[data-testid="stSidebar"] label {
-        color: #FFFFFF !important;
+        color: #00D2FF !important;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 600;
     }
 
-    /* Corrección del File Uploader (Subir archivo Excel) */
+    /* UPLOADER DE ARCHIVOS Y SELECTBOXES SIDEBAR */
     section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
-        background-color: #113358 !important;
-        border: 1px dashed rgba(255, 255, 255, 0.3) !important;
-        border-radius: 8px;
-        padding: 10px;
+        background: rgba(13, 31, 56, 0.7) !important;
+        border: 1px dashed #00D2FF !important;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
     }
 
     section[data-testid="stSidebar"] [data-testid="stFileUploader"] button {
-        background-color: #FFFFFF !important;
-        color: #0A2540 !important;
-        font-weight: 600 !important;
+        background: linear-gradient(135deg, #00D2FF 0%, #0077FF 100%) !important;
+        color: #030712 !important;
+        font-weight: 800 !important;
         border: none !important;
-    }
-
-    section[data-testid="stSidebar"] [data-testid="stFileUploader"] small,
-    section[data-testid="stSidebar"] [data-testid="stFileUploader"] span {
-        color: #E2E8F0 !important;
-    }
-
-    /* Corrección de Selectboxes */
-    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        background-color: #FFFFFF !important;
-        color: #0A2540 !important;
         border-radius: 6px;
+        box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+    }
+
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: #0B192C !important;
+        color: #FFFFFF !important;
+        border: 1px solid #00D2FF !important;
+        border-radius: 8px;
     }
 
     section[data-testid="stSidebar"] div[data-baseweb="select"] * {
-        color: #0A2540 !important;
-    }
-
-    /* Corrección de la métrica en la barra lateral */
-    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
-        background-color: #113358 !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-left: 4px solid #D90429 !important;
-        border-radius: 8px !important;
-    }
-
-    section[data-testid="stSidebar"] div[data-testid="stMetricLabel"] {
-        color: #CBD5E1 !important;
-    }
-
-    section[data-testid="stSidebar"] div[data-testid="stMetricValue"] {
         color: #FFFFFF !important;
     }
-    
-    section[data-testid="stSidebar"] hr {
-        border-color: rgba(255, 255, 255, 0.15) !important;
+
+    /* METRICAS SIDEBAR */
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+        background: rgba(11, 25, 44, 0.8) !important;
+        border: 1px solid #FF2A54 !important;
+        border-left: 5px solid #FF2A54 !important;
+        box-shadow: 0 0 15px rgba(255, 42, 84, 0.3);
     }
 
-    /* -------------------------------------------------------------------------
-       TARJETAS DE MÉTRICAS GENERALES (KPIs)
-       ------------------------------------------------------------------------- */
+    /* TARJETAS DE MÉTRICAS (KPIs PRINCIPALES) */
     div[data-testid="stMetric"] {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-left: 5px solid #1E6091;
-        border-radius: 10px;
-        padding: 16px 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+        background: rgba(11, 25, 44, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 210, 255, 0.3);
+        border-left: 5px solid #00D2FF;
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 210, 255, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 210, 255, 0.3), 0 0 20px rgba(0, 210, 255, 0.4);
+        border-color: #00D2FF;
     }
     
     div[data-testid="stMetricLabel"] {
-        font-weight: 600;
-        color: #64748B !important;
-        font-size: 0.88rem !important;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 700;
+        color: #94A3B8 !important;
+        font-size: 1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
     
     div[data-testid="stMetricValue"] {
-        color: #0A2540 !important;
-        font-weight: 700;
-        font-size: 1.65rem !important;
+        font-family: 'Orbitron', sans-serif;
+        color: #00D2FF !important;
+        font-weight: 800;
+        font-size: 1.8rem !important;
+        text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
     }
 
-    /* -------------------------------------------------------------------------
-       ESTILO DE PESTAÑAS (TABS)
-       ------------------------------------------------------------------------- */
+    /* PESTAÑAS FUTURISTAS (TABS) */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 6px;
-        background-color: #0A2540;
-        padding: 8px 10px;
-        border-radius: 10px;
-        box-shadow: 0 3px 8px rgba(10, 37, 64, 0.12);
+        gap: 12px;
+        background-color: rgba(5, 12, 26, 0.8);
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(0, 210, 255, 0.2);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .stTabs [data-baseweb="tab"] {
-        height: 42px;
-        background-color: transparent;
-        border-radius: 6px;
-        color: #CBD5E1 !important;
-        font-weight: 600;
-        font-size: 0.9rem;
-        border: none;
-        padding: 0px 18px;
+        height: 48px;
+        background-color: rgba(11, 25, 44, 0.6);
+        border-radius: 8px;
+        color: #94A3B8 !important;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        border: 1px solid transparent;
+        padding: 0px 22px;
+        transition: all 0.3s ease;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #00D2FF !important;
+        border-color: rgba(0, 210, 255, 0.4);
     }
 
     .stTabs [aria-selected="true"] {
-        background-color: #D90429 !important;
+        background: linear-gradient(135deg, #FF2A54 0%, #B80021 100%) !important;
         color: #FFFFFF !important;
-        box-shadow: 0 2px 6px rgba(217, 4, 41, 0.3);
+        border: 1px solid #FF2A54 !important;
+        box-shadow: 0 0 20px rgba(255, 42, 84, 0.6);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
     }
 
-    /* BOTONES PRIMARIOS */
+    /* BOTÓN FUTURISTA */
     div.stButton > button[kind="primary"] {
-        background-color: #D90429;
-        color: white;
-        font-weight: 600;
-        border-radius: 8px;
+        background: linear-gradient(90deg, #FF2A54 0%, #00D2FF 100%);
+        color: #FFFFFF;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        border-radius: 10px;
         border: none;
-        padding: 10px 24px;
-        box-shadow: 0 2px 6px rgba(217, 4, 41, 0.25);
+        padding: 12px 28px;
+        box-shadow: 0 0 20px rgba(255, 42, 84, 0.4);
+        transition: all 0.3s ease;
     }
     
     div.stButton > button[kind="primary"]:hover {
-        background-color: #B80021;
+        box-shadow: 0 0 30px rgba(0, 210, 255, 0.8);
+        transform: scale(1.02);
     }
 
-    h1, h2, h3, h4 {
-        color: #0A2540;
-        font-weight: 700;
+    /* ESTILIZACIÓN DE TABLAS */
+    div[data-testid="stDataFrame"] {
+        background: rgba(11, 25, 44, 0.6);
+        border: 1px solid rgba(0, 210, 255, 0.3);
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
     }
     </style>
 """, unsafe_allow_html=True)
 
-COLOR_PALETTE = ['#0A2540', '#1E6091', '#2A9D8F', '#E76F51', '#D90429', '#457B9D', '#A8DADC']
+# Paleta Neón Plotly alineada con el Logo
+PLOTLY_CYBER_THEME = ['#00D2FF', '#FF2A54', '#0077FF', '#9B51E0', '#00F5D4', '#FF9F1C']
 
 # ==============================================================================
-# 2. ENCABEZADO CON FONDO BLANCO Y DIFUMINADO
+# 3. ENCABEZADO TECH CON LOGO Y LUZ NEÓN
 # ==============================================================================
-st.markdown('<div class="header-container">', unsafe_allow_html=True)
+st.markdown('<div class="tech-header-container">', unsafe_allow_html=True)
 col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
@@ -202,24 +235,23 @@ for nombre in nombres_posibles:
     if os.path.exists(nombre):
         try:
             img = Image.open(nombre)
-            col_logo.image(img, width=400)
+            col_logo.image(img, width=420)
             logo_cargado = True
             break
         except Exception:
             pass
 
 if not logo_cargado:
-    col_logo.markdown("<h1 style='text-align: center; color: #0A2540; margin:0;'>🏥 PREVENSALUD IA</h1>", unsafe_allow_html=True)
-    col_logo.markdown("<p style='text-align: center; color: #64748B; font-weight: 500; margin:0;'>Plataforma Inteligente de Analítica Predictiva y Gestión Operativa Hospitalaria</p>", unsafe_allow_html=True)
+    col_logo.markdown("<h1 class='cyber-title'>PREVENSALUD IA</h1>", unsafe_allow_html=True)
+    col_logo.markdown("<p style='color: #00D2FF; font-family: Rajdhani; font-size: 1.2rem; font-weight: 600;'>SISTEMA INTELIGENTE DE ANALÍTICA PREDICTIVA Y HOSPITALARIA</p>", unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="header-fade"></div>', unsafe_allow_html=True)
 
 # ==============================================================================
-# 3. BARRA LATERAL (CONFIGURACIÓN Y FILTROS)
+# 4. BARRA LATERAL (SIDEBAR)
 # ==============================================================================
-st.sidebar.markdown("### ⚙️ Configuración")
-archivo_subido = st.sidebar.file_uploader("📁 Actualizar Dataset (Excel)", type=["xlsx"])
+st.sidebar.markdown("### ⚙️ CENTRO DE CONTROL")
+archivo_subido = st.sidebar.file_uploader("📂 Cargar Base de Datos (.xlsx)", type=["xlsx"])
 
 @st.cache_data
 def cargar_datos_disco():
@@ -236,17 +268,15 @@ elif df_raw is not None:
     df_base = df_raw.copy()
 else:
     st.info("👋 **Bienvenido a PrevenSalud IA**")
-    st.warning("Cargue un archivo Excel para habilitar las funciones.")
+    st.warning("Cargue un archivo Excel para habilitar los módulos.")
     st.stop()
 
-# Limpieza básica de columnas
 df_base.columns = df_base.columns.str.strip()
 
 for col_num in ['Edad', 'Días estancia', 'Dias estancia']:
     if col_num in df_base.columns:
         df_base[col_num] = pd.to_numeric(df_base[col_num], errors='coerce')
 
-# Procesamiento de fechas
 col_fecha = None
 columnas_posibles_fecha = ['f. ingreso', 'ingreso', 'fecha', 'f. nacimiento', 'fecha ingreso']
 
@@ -261,9 +291,8 @@ if col_fecha:
 
 df = df_base.copy()
 
-# Filtros dinámicos laterales
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔍 Filtros Operativos")
+st.sidebar.markdown("### 🎛️ FILTROS DE RED")
 
 if 'Servicio actual' in df.columns:
     servicios = ["Todos"] + sorted(list(df['Servicio actual'].dropna().unique()))
@@ -278,92 +307,92 @@ if 'Aseguradora' in df.columns:
         df = df[df['Aseguradora'] == aseg_sel]
 
 st.sidebar.markdown("---")
-st.sidebar.metric("Registros Filtrados", f"{len(df):,}")
+st.sidebar.metric("REGISTROS ACTIVOS", f"{len(df):,}")
 
 # ==============================================================================
-# 4. ESTRUCTURA DE PESTAÑAS
+# 5. ESTRUCTURA DE PESTAÑAS FUTURISTAS
 # ==============================================================================
 tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Tablero Control (KPIs)", 
-    "🔮 Simulador Predictivo IA", 
-    "🏥 Gestión de Capacidad y Servicios", 
-    "📁 Base de Datos Consolidada"
+    "📊 PANEL KPIs", 
+    "🔮 MOTOR PREDICTIVO IA", 
+    "🏥 CAPACIDAD & RED", 
+    "🌐 BASE DE DATOS"
 ])
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 1: DASHBOARD DE CONTROL
+# PESTAÑA 1: DASHBOARD CONTROL (NEÓN)
 # ------------------------------------------------------------------------------
 with tab1:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 📈 Resumen Ejecutivo y Capacidades Operativas")
-    st.markdown("<p style='color: #475569;'>Vista panorámica del comportamiento operativo e indicadores clave del centro médico.</p>", unsafe_allow_html=True)
+    st.markdown("### ⚡ METRICAS DE OPERACIÓN EN TIEMPO REAL")
     
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Pacientes Activos", f"{len(df):,}")
+    col1.metric("PACIENTES REGISTRADOS", f"{len(df):,}")
     
     col_estancia = 'Días estancia' if 'Días estancia' in df.columns else ('Dias estancia' if 'Dias estancia' in df.columns else None)
     if col_estancia and df[col_estancia].notna().any():
-        col2.metric("Promedio Estancia", f"{df[col_estancia].mean():.1f} días")
+        col2.metric("PROMEDIO ESTANCIA", f"{df[col_estancia].mean():.1f} días")
     else:
-        col2.metric("Promedio Estancia", "N/A")
+        col2.metric("PROMEDIO ESTANCIA", "N/A")
         
     if 'Edad' in df.columns and df['Edad'].notna().any():
-        col3.metric("Promedio Edad", f"{df['Edad'].mean():.1f} años")
+        col3.metric("EDAD PROMEDIO", f"{df['Edad'].mean():.1f} años")
     else:
-        col3.metric("Promedio Edad", "N/A")
+        col3.metric("EDAD PROMEDIO", "N/A")
         
     if 'Servicio actual' in df.columns:
-        col4.metric("Servicios Activos", f"{df['Servicio actual'].nunique()}")
+        col4.metric("SERVICIOS ACTIVOS", f"{df['Servicio actual'].nunique()}")
     else:
-        col4.metric("Servicios Activos", "N/A")
+        col4.metric("SERVICIOS ACTIVOS", "N/A")
         
     st.markdown("<br>", unsafe_allow_html=True)
     
     col_g1, col_g2 = st.columns(2)
     with col_g1:
         if 'Diagnóstico actual' in df.columns:
-            st.markdown("##### 🩺 Top 10 Diagnósticos Frecuentes")
+            st.markdown("##### 🩺 TOP DIAGNÓSTICOS PREVALENTES")
             top_diag = df['Diagnóstico actual'].value_counts().head(10).reset_index()
             top_diag.columns = ['Diagnóstico', 'Cantidad']
             
             fig_diag = px.bar(
                 top_diag, x='Cantidad', y='Diagnóstico', orientation='h',
-                color_discrete_sequence=['#1E6091']
+                color_discrete_sequence=['#00D2FF']
             )
             fig_diag.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                xaxis=dict(showgrid=True, gridcolor='rgba(0, 210, 255, 0.15)'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_diag, use_container_width=True)
             
     with col_g2:
         if 'Servicio actual' in df.columns:
-            st.markdown("##### 🏥 Distribución por Servicio")
+            st.markdown("##### 🏥 DISTRIBUCIÓN POR SERVICIO")
             serv_dist = df['Servicio actual'].value_counts().reset_index()
             serv_dist.columns = ['Servicio', 'Cantidad']
             
             fig_serv = px.pie(
-                serv_dist, names='Servicio', values='Cantidad', hole=0.5,
-                color_discrete_sequence=COLOR_PALETTE
+                serv_dist, names='Servicio', values='Cantidad', hole=0.6,
+                color_discrete_sequence=PLOTLY_CYBER_THEME
             )
             fig_serv.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
                 margin=dict(l=0, r=0, t=10, b=0),
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2)
             )
             st.plotly_chart(fig_serv, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 2: SIMULADOR PREDICTIVO IA
+# PESTAÑA 2: MOTOR PREDICTIVO IA
 # ------------------------------------------------------------------------------
 with tab2:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🔮 Estimación, Análisis de Período y Predicción Futura (IA)")
-    st.markdown("<p style='color: #475569;'>Seleccione el rango de fechas para evaluar métricas históricas y proyectar la demanda esperada.</p>", unsafe_allow_html=True)
+    st.markdown("### 🤖 ALGORITMO PREDICTIVO DE DEMANDA Y OCUPACIÓN")
     
     c_f1, c_f2 = st.columns(2)
     
@@ -372,9 +401,9 @@ with tab2:
     fecha_max = date(2035, 12, 31)
     
     with c_f1:
-        fecha_inicio = st.date_input("Fecha Inicial del Período", value=date(2026, 1, 1), min_value=fecha_min, max_value=fecha_max)
+        fecha_inicio = st.date_input("FECHA INICIO EVALUACIÓN", value=date(2026, 1, 1), min_value=fecha_min, max_value=fecha_max)
     with c_f2:
-        fecha_fin = st.date_input("Fecha Final del Período", value=date(2026, 6, 30), min_value=fecha_min, max_value=fecha_max)
+        fecha_fin = st.date_input("FECHA FIN EVALUACIÓN", value=date(2026, 6, 30), min_value=fecha_min, max_value=fecha_max)
         
     dias_periodo = (fecha_fin - fecha_inicio).days + 1
     
@@ -383,63 +412,62 @@ with tab2:
     else:
         es_futuro = fecha_inicio > hoy
         
-        st.markdown("<hr style='margin: 15px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
-        st.markdown("##### ⚙️ Parámetros de Capacidad Operativa y Contingencia")
+        st.markdown("<hr style='border-color: rgba(0, 210, 255, 0.2);'>", unsafe_allow_html=True)
+        st.markdown("##### ⚙️ PARÁMETROS OPERATIVOS DE RED")
         c_sim1, c_sim2, c_sim3 = st.columns(3)
         
         with c_sim1:
-            medicos_input = st.number_input("Médicos Programados por Turno", min_value=1, max_value=50, value=6)
+            medicos_input = st.number_input("Médicos por Turno", min_value=1, max_value=50, value=6)
             enfermeros_input = st.number_input("Enfermeros/Asistentes por Turno", min_value=1, max_value=80, value=12)
             
         with c_sim2:
-            camas_totales = st.number_input("Camas Totales Disponibles", min_value=10, max_value=300, value=50)
-            camas_ocupadas = st.number_input("Camas Ocupadas Promedio", min_value=0, max_value=300, value=35)
+            camas_totales = st.number_input("Camas Totales", min_value=10, max_value=300, value=50)
+            camas_ocupadas = st.number_input("Camas Ocupadas Base", min_value=0, max_value=300, value=35)
             
         with c_sim3:
-            jornada = st.selectbox("Turno Operativo Predominante", ["Mañana", "Tarde", "Noche"])
-            clima = st.selectbox("Escenario Epidemiológico/Climático", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico / Pandemia"])
+            jornada = st.selectbox("Turno Operativo", ["Mañana", "Tarde", "Noche"])
+            clima = st.selectbox("Escenario de Contingencia", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico / Pandemia"])
 
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 Ejecutar Proyección IA", type="primary"):
-            st.markdown("<hr style='margin: 20px 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
+        if st.button("🚀 EJECUTAR SIMULACIÓN IA", type="primary"):
+            st.markdown("<hr style='border-color: rgba(0, 210, 255, 0.2);'>", unsafe_allow_html=True)
             
             if not es_futuro:
-                st.markdown(f"#### 📋 Análisis Histórico ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
+                st.markdown(f"#### 📋 HISTÓRICO DE AFLUENCIA ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
                 
                 if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
                     df_rango = df_base[(df_base['Fecha_Solo_Dia'] >= fecha_inicio) & (df_base['Fecha_Solo_Dia'] <= fecha_fin)]
                     ingresos_reales = len(df_rango)
                     
                     r1, r2, r3, r4 = st.columns(4)
-                    r1.metric("Ingresos Totales", f"{ingresos_reales} pac.")
-                    r2.metric("Días Evaluados", f"{dias_periodo} días")
+                    r1.metric("INGRESOS REALES", f"{ingresos_reales} pac.")
+                    r2.metric("DÍAS EVALUADOS", f"{dias_periodo} días")
                     
                     if col_estancia and ingresos_reales > 0:
-                        r3.metric("Prom. Estancia", f"{df_rango[col_estancia].mean():.1f} días")
+                        r3.metric("PROM. ESTANCIA", f"{df_rango[col_estancia].mean():.1f} días")
                     else:
-                        r3.metric("Prom. Estancia", "N/A")
+                        r3.metric("PROM. ESTANCIA", "N/A")
                         
                     promedio_diario = round(ingresos_reales / dias_periodo, 1) if dias_periodo > 0 else 0
-                    r4.metric("Promedio Ingresos/Día", f"{promedio_diario} pac/día")
+                    r4.metric("INGRESOS/DÍA", f"{promedio_diario} pac/día")
                     
                     if ingresos_reales > 0:
                         st.markdown("<br>", unsafe_allow_html=True)
-                        st.markdown("##### 📉 Flujo Diario Histórico de Pacientes")
+                        st.markdown("##### 📉 TENDENCIA DE AFLUENCIA DÍA A DÍA")
                         df_trend = df_rango.groupby('Fecha_Solo_Dia').size().reset_index(name='Atenciones')
                         
-                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, color_discrete_sequence=['#1E6091'])
+                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, color_discrete_sequence=['#00D2FF'])
                         fig_line.update_layout(
                             plot_bgcolor='rgba(0,0,0,0)',
                             paper_bgcolor='rgba(0,0,0,0)',
-                            xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
-                            yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
+                            font=dict(color="#E2E8F0", family="Rajdhani"),
+                            xaxis=dict(showgrid=True, gridcolor='rgba(0, 210, 255, 0.15)'),
+                            yaxis=dict(showgrid=True, gridcolor='rgba(0, 210, 255, 0.15)')
                         )
                         st.plotly_chart(fig_line, use_container_width=True)
-                    else:
-                        st.warning(f"No se registraron atenciones entre el {fecha_inicio.strftime('%d/%m/%Y')} y el {fecha_fin.strftime('%d/%m/%Y')}.")
             
-            # PROYECCIÓN PREDICTIVA
-            st.markdown(f"#### 🔮 Proyección Predictiva IA ({dias_periodo} días proyectados)")
+            # ESTIMACIÓN IA
+            st.markdown(f"#### 🔮 ESTIMACIÓN MODELO PREDICTIVO ({dias_periodo} DÍAS)")
             
             factor_jornada = 1.3 if jornada == "Noche" else (1.1 if jornada == "Tarde" else 1.0)
             factor_clima = 1.4 if clima == "Pico Epidemiológico / Pandemia" else (1.25 if clima == "Lluvia Intensa" else (1.1 if clima == "Lluvia Moderada" else 1.0))
@@ -449,70 +477,70 @@ with tab2:
             ocupacion_proyectada = min(100.0, ((camas_ocupadas + (estimacion_diaria * 0.45)) / camas_totales) * 100)
             
             p1, p2, p3 = st.columns(3)
-            p1.metric(f"Afluencia Estimada", f"{estimacion_total_periodo:,} pac.")
-            p2.metric("Ocupación Proyectada Camas", f"{ocupacion_proyectada:.1f}%")
-            p3.metric("Demanda Diaria Estimada", f"~{estimacion_diaria} pac/día")
+            p1.metric(f"DEMANDA PROYECTADA", f"{estimacion_total_periodo:,} pac.")
+            p2.metric("OCUPACIÓN CAMAS ESPERADA", f"{ocupacion_proyectada:.1f}%")
+            p3.metric("PROMEDIO DIARIO IA", f"~{estimacion_diaria} pac/día")
             
             st.markdown("<br>", unsafe_allow_html=True)
             if ocupacion_proyectada < 75:
-                st.success("🟢 **RIESGO BAJO:** Capacidad operativa suficiente para la demanda proyectada.")
+                st.success("🟢 **ESTADO VERDE / RIESGO BAJO:** Capacidad holgada para cubrir la demanda esperada.")
             elif ocupacion_proyectada < 90:
-                st.warning("🟡 **RIESGO MODERADO:** Se aconseja agilizar las altas médicas y reforzar personal.")
+                st.warning("🟡 **ALERTA AMARILLA / RIESGO MODERADO:** Se recomienda agilizar altas médicas para liberar giros de cama.")
             else:
-                st.error("🔴 **RIESGO ALTO / SOBRECAPACIDAD:** Alto riesgo de saturación hospitalaria en el período.")
+                st.error("🔴 **ALERTA ROJA / SOBRECAPACIDAD:** Alto riesgo de saturación en red. Activar protocolo de contingencia.")
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 3: GESTIÓN DE CAPACIDAD Y SERVICIOS
+# PESTAÑA 3: CAPACIDAD Y SERVICIOS
 # ------------------------------------------------------------------------------
 with tab3:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 🏥 Análisis Operativo de Aseguradoras y Especialidades")
-    st.markdown("<p style='color: #475569;'>Distribución por pagadores/convenios e indicadores de especialidades.</p>", unsafe_allow_html=True)
+    st.markdown("### 🌐 ANÁLISIS DE COBERTURA Y ASEGURADORAS")
     
     col_s1, col_s2 = st.columns(2)
     
     with col_s1:
         if 'Aseguradora' in df.columns:
-            st.markdown("##### 💳 Pacientes por Aseguradora / EPS")
+            st.markdown("##### 💳 DEMANDA POR ASEGURADORA / EPS")
             aseg_dist = df['Aseguradora'].value_counts().head(10).reset_index()
             aseg_dist.columns = ['Aseguradora', 'Pacientes']
             
             fig_aseg = px.bar(
                 aseg_dist, x='Pacientes', y='Aseguradora', orientation='h',
-                color_discrete_sequence=['#0A2540']
+                color_discrete_sequence=['#FF2A54']
             )
             fig_aseg.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
                 margin=dict(l=0, r=10, t=10, b=0),
-                xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
+                xaxis=dict(showgrid=True, gridcolor='rgba(255, 42, 84, 0.15)'),
                 yaxis=dict(autorange="reversed")
             )
             st.plotly_chart(fig_aseg, use_container_width=True)
             
     with col_s2:
         if 'Especialidad' in df.columns:
-            st.markdown("##### 🩺 Atenciones por Especialidad")
+            st.markdown("##### 🩺 ATENCIONES POR ESPECIALIDAD")
             esp_dist = df['Especialidad'].value_counts().head(10).reset_index()
             esp_dist.columns = ['Especialidad', 'Pacientes']
             
             fig_esp = px.pie(
                 esp_dist, names='Especialidad', values='Pacientes',
-                color_discrete_sequence=COLOR_PALETTE
+                color_discrete_sequence=PLOTLY_CYBER_THEME
             )
             fig_esp.update_layout(
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
                 margin=dict(l=0, r=0, t=10, b=0),
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2)
             )
             st.plotly_chart(fig_esp, use_container_width=True)
 
 # ------------------------------------------------------------------------------
-# PESTAÑA 4: EXPLORADOR DE DATOS
+# PESTAÑA 4: BASE DE DATOS
 # ------------------------------------------------------------------------------
 with tab4:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("### 📁 Registros Hospitalarios Consolidados")
-    st.markdown("<p style='color: #475569;'>Tabla interactiva con los datos detallados actualmente filtrados.</p>", unsafe_allow_html=True)
+    st.markdown("### 🌐 EXPLORADOR DE DATOS MATRICIAL")
     st.dataframe(df, use_container_width=True)
