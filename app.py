@@ -35,17 +35,13 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* ENCABEZADO Y CONTENEDOR DEL LOGO (GLASSMORPHISM NEÓN) */
-    .tech-header-container {
-        background: rgba(11, 25, 44, 0.65);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(0, 210, 255, 0.3);
-        border-radius: 16px;
-        padding: 25px 10px 15px 10px;
-        text-align: center;
-        box-shadow: 0 0 25px rgba(0, 210, 255, 0.15), inset 0 0 15px rgba(217, 4, 41, 0.05);
-        margin-bottom: 25px;
+    /* OCULTAR MENÚS Y ESPACIOS VACÍOS SUPERIORES DE STREAMLIT */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+    
+    .block-container {
+        padding-top: 1.5rem !important;
     }
 
     /* TITULOS FUTURISTAS */
@@ -83,12 +79,17 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* UPLOADER DE ARCHIVOS Y SELECTBOXES SIDEBAR */
+    /* CORRECCIÓN VISUAL UPLOADER DE ARCHIVOS */
     section[data-testid="stSidebar"] [data-testid="stFileUploader"] {
-        background: rgba(13, 31, 56, 0.7) !important;
+        background: rgba(11, 25, 44, 0.9) !important;
         border: 1px dashed #00D2FF !important;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] section {
+        background: transparent !important;
     }
 
     section[data-testid="stSidebar"] [data-testid="stFileUploader"] button {
@@ -97,7 +98,7 @@ st.markdown("""
         font-weight: 800 !important;
         border: none !important;
         border-radius: 6px;
-        box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+        box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
     }
 
     section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
@@ -219,13 +220,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Paleta Neón Plotly alineada con el Logo
 PLOTLY_CYBER_THEME = ['#00D2FF', '#FF2A54', '#0077FF', '#9B51E0', '#00F5D4', '#FF9F1C']
 
 # ==============================================================================
-# 3. ENCABEZADO TECH CON LOGO Y LUZ NEÓN
+# 3. ENCABEZADO CON LOGO CENTRADO (SIN CAJAS O BARRAS VACÍAS)
 # ==============================================================================
-st.markdown('<div class="tech-header-container">', unsafe_allow_html=True)
 col_izq, col_logo, col_der = st.columns([1, 2, 1])
 
 logo_cargado = False
@@ -235,17 +234,17 @@ for nombre in nombres_posibles:
     if os.path.exists(nombre):
         try:
             img = Image.open(nombre)
-            col_logo.image(img, width=420)
+            col_logo.image(img, use_container_width=True)
             logo_cargado = True
             break
         except Exception:
             pass
 
 if not logo_cargado:
-    col_logo.markdown("<h1 class='cyber-title'>PREVENSALUD IA</h1>", unsafe_allow_html=True)
-    col_logo.markdown("<p style='color: #00D2FF; font-family: Rajdhani; font-size: 1.2rem; font-weight: 600;'>SISTEMA INTELIGENTE DE ANALÍTICA PREDICTIVA Y HOSPITALARIA</p>", unsafe_allow_html=True)
+    col_logo.markdown("<h1 class='cyber-title' style='text-align: center;'>PREVENSALUD IA</h1>", unsafe_allow_html=True)
+    col_logo.markdown("<p style='color: #00D2FF; font-family: Rajdhani; font-size: 1.2rem; font-weight: 600; text-align: center;'>SISTEMA INTELIGENTE DE ANALÍTICA PREDICTIVA Y HOSPITALARIA</p>", unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # ==============================================================================
 # 4. BARRA LATERAL (SIDEBAR)
