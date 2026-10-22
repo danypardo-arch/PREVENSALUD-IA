@@ -473,3 +473,148 @@ with tab2:
     hoy = date.today()
     fecha_min = date(2015, 1, 1)
     fecha_max = date(2035, 12, 31)
+    
+    with c_f1:
+        fecha_inicio = st.date_input("FECHA INICIO EVALUACIÓN", value=date(2026, 1, 1), min_value=fecha_min, max_value=fecha_max)
+    with c_f2:
+        fecha_fin = st.date_input("FECHA FIN EVALUACIÓN", value=date(2026, 6, 30), min_value=fecha_min, max_value=fecha_max)
+        
+    dias_periodo = (fecha_fin - fecha_inicio).days + 1
+    
+    if fecha_inicio > fecha_fin:
+        st.error("⚠️ La Fecha Inicial no puede ser posterior a la Fecha Final.")
+    else:
+        es_futuro = fecha_inicio > hoy
+        
+        st.markdown("<hr style='border-color: rgba(0, 210, 255, 0.2);'>", unsafe_allow_html=True)
+        st.markdown("##### ⚙️ PARÁMETROS OPERATIVOS DE RED")
+        c_sim1, c_sim2, c_sim3 = st.columns(3)
+        
+        with c_sim1:
+            medicos_input = st.number_input("Médicos por Turno", min_value=1, max_value=50, value=6)
+            enfermeros_input = st.number_input("Enfermeros/Asistentes por Turno", min_value=1, max_value=80, value=12)
+            
+        with c_sim2:
+            camas_totales = st.number_input("Camas Totales", min_value=10, max_value=300, value=50)
+            camas_ocupadas = st.number_input("Camas Ocupadas Base", min_value=0, max_value=300, value=35)
+            
+        with c_sim3:
+            jornada = st.selectbox("Turno Operativo", ["Mañana", "Tarde", "Noche"])
+            clima = st.selectbox("Escenario de Contingencia", ["Normal", "Lluvia Moderada", "Lluvia Intensa", "Pico Epidemiológico / Pandemia"])
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🚀 EJECUTAR SIMULACIÓN IA", type="primary"):
+            st.markdown("<hr style='border-color: rgba(0, 210, 255, 0.2);'>", unsafe_allow_html=True)
+            
+            if not es_futuro:
+                st.markdown(f"#### 📋 HISTÓRICO DE AFLUENCIA ({fecha_inicio.strftime('%d/%m/%Y')} - {fecha_fin.strftime('%d/%m/%Y')})")
+                
+                if col_fecha and 'Fecha_Solo_Dia' in df_base.columns:
+                    df_rango = df_base[(df_base['Fecha_Solo_Dia'] >= fecha_inicio) & (df_base['Fecha_Solo_Dia'] <= fecha_fin)]
+                    ingresos_reales = len(df_rango)
+                    
+                    r1, r2, r3, r4 = st.columns(4)
+                    r1.metric("INGRESOS REALES", f"{ingresos_reales} pac.")
+                    r2.metric("DÍAS EVALUADOS", f"{dias_periodo} días")
+                    
+                    if col_estancia and ingresos_reales > 0:
+                        r3.metric("PROM. ESTANCIA", f"{df_rango[col_estancia].mean():.1f} días")
+                    else:
+                        r3.metric("PROM. ESTANCIA", "N/A")
+                        
+                    promedio_diario = round(ingresos_reales / dias_periodo, 1) if dias_periodo > 0 else 0
+                    r4.metric("INGRESOS/DÍA", f"{promedio_diario} pac/día")
+                    
+                    if ingresos_reales > 0:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        st.markdown("##### 📉 TENDENCIA DE AFLUENCIA DÍA A DÍA")
+                        df_trend = df_rango.groupby('Fecha_Solo_Dia').size().reset_index(name='Atenciones')
+                        
+                        fig_line = px.line(df_trend, x='Fecha_Solo_Dia', y='Atenciones', markers=True, color_discrete_sequence=['#00D2FF'])
+                        fig_line.update_layout(
+                            plot_bgcolor='rgba(0,0,0,0)',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            font=dict(color="#E2E8F0", family="Rajdhani"),
+                            xaxis=dict(showgrid=True, gridcolor='rgba(0, 210, 255, 0.15)'),
+                            yaxis=dict(showgrid=True, gridcolor='rgba(0, 210, 255, 0.15)')
+                        )
+                        st.plotly_chart(fig_line, use_container_width=True)
+            
+            # ESTIMACIÓN IA
+            st.markdown(f"#### 🔮 ESTIMACIÓN MODELO PREDICTIVO ({dias_periodo} DÍAS)")
+            
+            factor_jornada = 1.3 if jornada == "Noche" else (1.1 if jornada == "Tarde" else 1.0)
+            factor_clima = 1.4 if clima == "Pico Epidemiológico / Pandemia" else (1.25 if clima == "Lluvia Intensa" else (1.1 if clima == "Lluvia Moderada" else 1.0))
+            
+            estimacion_diaria = int((medicos_input * 2.8 + enfermeros_input * 1.3) * factor_jornada * factor_clima)
+            estimacion_total_periodo = estimacion_diaria * dias_periodo
+            ocupacion_proyectada = min(100.0, ((camas_ocupadas + (estimacion_diaria * 0.45)) / camas_totales) * 100)
+            
+            p1, p2, p3 = st.columns(3)
+            p1.metric(f"DEMANDA PROYECTADA", f"{estimacion_total_periodo:,} pac.")
+            p2.metric("OCUPACIÓN CAMAS ESPERADA", f"{ocupacion_proyectada:.1f}%")
+            p3.metric("PROMEDIO DIARIO IA", f"~{estimacion_diaria} pac/día")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            if ocupacion_proyectada < 75:
+                st.success("🟢 **ESTADO VERDE / RIESGO BAJO:** Capacidad holgada para cubrir la demanda esperada.")
+            elif ocupacion_proyectada < 90:
+                st.warning("🟡 **ALERTA AMARILLA / RIESGO MODERADO:** Se recomienda agilizar altas médicas para liberar giros de cama.")
+            else:
+                st.error("🔴 **ALERTA ROJA / SOBRECAPACIDAD:** Alto riesgo de saturación en red. Activar protocolo de contingencia.")
+
+# ------------------------------------------------------------------------------
+# PESTAÑA 3: CAPACIDAD Y SERVICIOS
+# ------------------------------------------------------------------------------
+with tab3:
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### 🌐 ANÁLISIS DE COBERTURA Y ASEGURADORAS")
+    
+    col_s1, col_s2 = st.columns(2)
+    
+    with col_s1:
+        if 'Aseguradora' in df.columns:
+            st.markdown("##### 💳 DEMANDA POR ASEGURADORA / EPS")
+            aseg_dist = df['Aseguradora'].value_counts().head(10).reset_index()
+            aseg_dist.columns = ['Aseguradora', 'Pacientes']
+            
+            fig_aseg = px.bar(
+                aseg_dist, x='Pacientes', y='Aseguradora', orientation='h',
+                color_discrete_sequence=['#FF2A54']
+            )
+            fig_aseg.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
+                margin=dict(l=0, r=10, t=10, b=0),
+                xaxis=dict(showgrid=True, gridcolor='rgba(255, 42, 84, 0.15)'),
+                yaxis=dict(autorange="reversed")
+            )
+            st.plotly_chart(fig_aseg, use_container_width=True)
+            
+    with col_s2:
+        if 'Especialidad' in df.columns:
+            st.markdown("##### 🩺 ATENCIONES POR ESPECIALIDAD")
+            esp_dist = df['Especialidad'].value_counts().head(10).reset_index()
+            esp_dist.columns = ['Especialidad', 'Pacientes']
+            
+            fig_esp = px.pie(
+                esp_dist, names='Especialidad', values='Pacientes',
+                color_discrete_sequence=PLOTLY_CYBER_THEME
+            )
+            fig_esp.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color="#E2E8F0", family="Rajdhani"),
+                margin=dict(l=0, r=0, t=10, b=0),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2)
+            )
+            st.plotly_chart(fig_esp, use_container_width=True)
+
+# ------------------------------------------------------------------------------
+# PESTAÑA 4: BASE DE DATOS
+# ------------------------------------------------------------------------------
+with tab4:
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### 🌐 EXPLORADOR DE DATOS MATRICIAL")
+    st.dataframe(df, use_container_width=True)
