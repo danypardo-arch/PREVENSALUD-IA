@@ -271,7 +271,7 @@ if not st.session_state.habeas_aceptado:
     st.markdown('<div class="habeas-card">', unsafe_allow_html=True)
     
     st.markdown("### 🔐 Aviso de Habeas Data y Consentimiento Informado")
-    st.markdown("**PrevenSalud IA (Proyecto Académico)**")
+    st.markdown("**PrevenSalud IA**")
     
     st.write(
         "Al ingresar y utilizar este aplicativo, usted declara conocer y autorizar de manera expresa, libre e informada "
